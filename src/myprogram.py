@@ -48,9 +48,9 @@ class MyModel:
             inp = inp if len(inp) < 2 else inp[-2:]
 
             if inp not in self.lookups.keys():
-                preds.append(['e', 's', ' ']) # common characters
+                preds.append('es ') # common characters
             else:
-                preds.append([c for c in self.lookups[inp]])
+                preds.append(self.lookups[inp])
 
         return preds
 
