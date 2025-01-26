@@ -45,7 +45,7 @@ class MyModel:
         preds = []
 
         for inp in data:
-            inp = inp if len(inp) < 2 else inp[-2:]
+            inp = (inp if len(inp) < 2 else inp[-2:]).lower()
 
             if inp not in self.lookups.keys():
                 preds.append('es ') # common characters
@@ -64,7 +64,7 @@ class MyModel:
     def load(cls, work_dir):
         lookups = {}
         
-        with open(os.path.join(work_dir, 'model.csv')) as preds_csv:
+        with open('src/model.csv') as preds_csv:
             preds_reader = csv.reader(preds_csv, delimiter=',')
             for [bigram, preds] in preds_reader:
                 lookups[bigram] = preds
