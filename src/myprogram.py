@@ -6,6 +6,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import csv
 
+N = 3
 
 class MyModel:
     """
@@ -45,7 +46,7 @@ class MyModel:
         preds = []
 
         for inp in data:
-            inp = (inp if len(inp) < 2 else inp[-2:]).lower()
+            inp = (inp if len(inp) < N - 1 else inp[-(N - 1):]).lower()
 
             if inp not in self.lookups.keys():
                 preds.append('es ') # common characters
