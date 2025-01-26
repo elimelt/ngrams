@@ -13,8 +13,8 @@ class MyModel:
     This is a starter model to get you started. Feel free to modify this file.
     """
 
-    def __init__(self, lookups):
-        self.lookups = lookups
+    def __init__(self):
+        self.lookups = None
 
     @classmethod
     def load_training_data(cls):
@@ -70,7 +70,9 @@ class MyModel:
             for [bigram, preds] in preds_reader:
                 lookups[bigram] = preds
 
-        return MyModel(lookups)
+        model = MyModel()
+        model.lookups = lookups
+        return model
 
 
 if __name__ == '__main__':
