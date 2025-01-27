@@ -33,7 +33,8 @@ def write_ngram_csv(counts: Dict[str, Counter], output_path: str) -> None:
         for context, char_counts in counts.items():
             top_3 = char_counts.most_common(3)
             chars = ''.join(char for char, _ in top_3)
-            writer.writerow([context, chars])
+            if '\u0000' not in context and '\u0000' not in chars:
+                writer.writerow([context, chars])
 
 if __name__ == "__main__":
     total_counts = defaultdict(Counter)
