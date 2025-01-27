@@ -2,15 +2,11 @@
 
 ## MASC
 
-We plan to start with English-only data for our first models (including common punctuation and whitespace characters). We will use large text datasets,
-starting with the [MASC](https://anc.org/data/masc/corpus/), a subset of the American National Corpus.
-It's a ~500k word dataset of public domain English text and licensed under the Creative Commons Attribution 3.0 United States License, making it acceptable for use in our project.
+We plan to start with English-only data for our first model (including common punctuation and whitespace characters). We will use large text datasets, starting with the [MASC](https://anc.org/data/masc/corpus/), a subset of the American National Corpus. It's a ~500k word dataset of public domain English text and licensed under the Creative Commons Attribution 3.0 United States License, making it acceptable for use in our project.
 
-For each document in this corpus, some preprocessing such as removing excess whitespace will be necessary. 
-Some files like court transcripts contain metadata about the text like date and author. We will likely remove this metadata for a cleaner text file.
+For each document in this corpus, some preprocessing such as removing excess whitespace will be necessary.  Some files like court transcripts contain metadata about the text like date and author. We will likely remove this metadata for a cleaner text file.
 
-This dataset is useful because it contains both written and spoken English text and can be easily obtained
-by anyone through a download.
+This dataset is useful because it contains both written and spoken English text and can be easily obtained by anyone through a download.
 
 ## Project Gutenberg
 
@@ -20,13 +16,8 @@ These files contain metadata and chapter information at the top and licensing in
 
 # Methods
 
-For the first checkpoint, we will fit a lookup table of all character n-grams (we will experiment with the value of n) seen in the text to the three most-common next characters. To make predictions, we will take the most recent n-gram from the input string and return the top-three next characters using the mapping.
-
-This method does not capture the previous content of the input utterance, meaning it does not necessarily
-make better predictions with more context. We plan to improve upon this in future iterations.
+For Checkpoint 1, we used Python to fit a lookup table of all character n-grams (with n as a hyperparameter) seen in the MASC text to the three most-common next characters. To make predictions, we take the most recent n-gram from the input string and return the top-three next characters using the mapping. One disadvantage of this method is that it does not capture the content of the input utterance past n characters, meaning it does not necessarily make better predictions with more context. We plan to improve upon this in future iterations.
 
 ## Future Directions
 
-In later iterations, we plan to experiment with neural network architectures
-with token-based (as opposed to character-based) feature representations. We will explore semantic feature
-representations in hopes of making more-informed predictions.
+In later models, we will continue to use Python, and will additionally incorporate common scientific computing and machine learning libraries such as Numpy and Pytorch. We plan to experiment with neural network architectures with token-based (as opposed to character-based) feature representations. We will explore semantic feature representations in hopes of making more informed predictions. We will also incorporate data from several languages other than English.
