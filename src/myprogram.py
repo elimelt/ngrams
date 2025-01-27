@@ -57,9 +57,7 @@ class MyModel:
 
     def save(self, work_dir):
         # your code here
-        # this particular model has nothing to save, but for demonstration purposes we will save a blank file
-        with open(os.path.join(work_dir, 'model.csv'), 'wt') as f:
-            f.write('dummy save')
+        pass
 
     @classmethod
     def load(cls, work_dir):
