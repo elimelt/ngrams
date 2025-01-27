@@ -6,7 +6,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import csv
 
-N = 3
+N = 5
 
 class MyModel:
     """
@@ -57,15 +57,13 @@ class MyModel:
 
     def save(self, work_dir):
         # your code here
-        # this particular model has nothing to save, but for demonstration purposes we will save a blank file
-        with open(os.path.join(work_dir, 'model.csv'), 'wt') as f:
-            f.write('dummy save')
+        pass
 
     @classmethod
     def load(cls, work_dir):
         lookups = {}
         
-        with open('src/model.csv') as preds_csv:
+        with open('work/model.csv') as preds_csv:
             preds_reader = csv.reader(preds_csv, delimiter=',')
             for [bigram, preds] in preds_reader:
                 lookups[bigram] = preds

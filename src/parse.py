@@ -6,7 +6,7 @@ import csv
 from typing import Dict, List, Tuple
 
 DATA_ROOT = "data"
-N = 3  # n-gram size (includes prediction character)
+N = 5  # n-gram size (includes prediction character)
 
 def normalize_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
@@ -33,7 +33,8 @@ def write_ngram_csv(counts: Dict[str, Counter], output_path: str) -> None:
         for context, char_counts in counts.items():
             top_3 = char_counts.most_common(3)
             chars = ''.join(char for char, _ in top_3)
-            writer.writerow([context, chars])
+            if '\u0000' not in context and '\u0000' not in chars:
+                writer.writerow([context, chars])
 
 if __name__ == "__main__":
     total_counts = defaultdict(Counter)
@@ -44,4 +45,4 @@ if __name__ == "__main__":
             for context, counts in file_counts.items():
                 total_counts[context].update(counts)
 
-    write_ngram_csv(total_counts, 'src/model.csv')
+    write_ngram_csv(total_counts, 'work/model.csv')

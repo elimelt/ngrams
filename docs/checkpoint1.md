@@ -2,15 +2,11 @@
 
 ## MASC
 
-We plan to start with English-only data for our first models (including common punctuation and whitespace characters). We will use large text datasets,
-starting with the [MASC](https://anc.org/data/masc/corpus/), a subset of the American National Corpus.
-It's a ~500k word dataset of public domain English text and licensed under the Creative Commons Attribution 3.0 United States License, making it acceptable for use in our project.
+We plan to start with English-only data for our first model (including common punctuation and whitespace characters). We will use large text datasets, starting with the [MASC](https://anc.org/data/masc/corpus/), a subset of the American National Corpus. It's a ~500k word dataset of public domain English text and licensed under the Creative Commons Attribution 3.0 United States License, making it acceptable for use in our project.
 
-For each document in this corpus, some preprocessing such as removing excess whitespace will be necessary. 
-Some files like court transcripts contain metadata about the text like date and author. We will likely remove this metadata for a cleaner text file.
+For each document in this corpus, some preprocessing such as removing excess whitespace will be necessary.  Some files like court transcripts contain metadata about the text like date and author. We will likely remove this metadata for a cleaner text file.
 
-This dataset is useful because it contains both written and spoken English text and can be easily obtained
-by anyone through a download.
+This dataset is useful because it contains both written and spoken English text and can be easily obtained by anyone through a download.
 
 ## Project Gutenberg
 
