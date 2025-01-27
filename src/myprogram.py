@@ -6,7 +6,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import csv
 
-N = 3
+N = 5
 
 class MyModel:
     """
@@ -65,7 +65,7 @@ class MyModel:
     def load(cls, work_dir):
         lookups = {}
         
-        with open('src/model.csv') as preds_csv:
+        with open('work/model.csv') as preds_csv:
             preds_reader = csv.reader(preds_csv, delimiter=',')
             for [bigram, preds] in preds_reader:
                 lookups[bigram] = preds
