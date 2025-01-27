@@ -16,11 +16,11 @@ by anyone through a download.
 
 Project Gutenberg is an online library of public domain (in the US) eBooks. Although we plan to start with English books, it also has books in a variety of languages which we may use in the future to expand the model's language capabilities. The downside of this source is that books must be individually and manually downloaded. Additionally, public domain books tend to use older styles of writing since it takes time for books to become public domain, so the content of these books may or may not accurately represent current English writing styles.
 
-These files contain metadata and chapter information at the top and licensing information at the bottom, which we will not feed into our model (or else it will know too much about US copyright law).
+These files contain metadata and chapter information at the top and licensing information at the bottom, which we will not feed into our model (or else it may be biased towards talking about US copyright law).
 
 # Methods
 
-For the first checkpoint, we will fit a lookup table of all character bigrams seen in the text to the three most-common next characters. To make predictions, we will take the most recent bigram from the input string and return the top-three next characters.
+For the first checkpoint, we will fit a lookup table of all character n-grams (we will experiment with the value of n) seen in the text to the three most-common next characters. To make predictions, we will take the most recent n-gram from the input string and return the top-three next characters using the mapping.
 
 This method does not capture the previous content of the input utterance, meaning it does not necessarily
 make better predictions with more context. We plan to improve upon this in future iterations.
