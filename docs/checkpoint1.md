@@ -20,6 +20,8 @@ These files contain metadata and chapter information at the top and licensing in
 
 # Methods
 
+We will use Python for this project as it is what the group is comfortable with and it has many ML/NLP-related packages for use.
+
 For the first checkpoint, we will fit a lookup table of all character n-grams (we will experiment with the value of n) seen in the text to the three most-common next characters. To make predictions, we will take the most recent n-gram from the input string and return the top-three next characters using the mapping.
 
 This method does not capture the previous content of the input utterance, meaning it does not necessarily
@@ -27,6 +29,7 @@ make better predictions with more context. We plan to improve upon this in futur
 
 ## Future Directions
 
-In later iterations, we plan to experiment with neural network architectures
-with token-based (as opposed to character-based) feature representations. We will explore semantic feature
-representations in hopes of making more-informed predictions.
+In later iterations, we plan to experiment with neural network architectures (in pytorch).
+
+One approch is token-based (as opposed to character-based) feature representations. We will explore semantic feature
+representations in hopes of making more-informed predictions. A simpler option is the bag of n-grams (n is a hyperparameter) feature representation.
