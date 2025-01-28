@@ -29,7 +29,10 @@ def parse_file(path: str, chunk_size: int = 1024*1024) -> Dict[str, Counter]:
 
 def write_ngram_csv(counts: Dict[str, Counter], output_path: str) -> None:
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f,
+                          quoting=csv.QUOTE_NONNUMERIC,
+                          doublequote=True,
+                          escapechar=None)
         for context, char_counts in counts.items():
             top_3 = char_counts.most_common(3)
             chars = ''.join(char for char, _ in top_3)

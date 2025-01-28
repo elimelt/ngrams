@@ -16,6 +16,20 @@ class MyModel:
     def __init__(self):
         self.lookups = None
 
+    @staticmethod
+    def pad_prediction(pred):
+        """pad prediction to exactly 3 characters using e, s, space."""
+        if len(pred) >= 3:
+            return pred[:3]
+        return pred + "es "[:(3 - len(pred))]
+
+    @staticmethod
+    def pad_prefix(prefix):
+        """pad prefix to N-1 characters using spaces."""
+        if len(prefix) >= N-1:
+            return prefix[-(N-1):]
+        return " " * (N-1 - len(prefix)) + prefix
+
     @classmethod
     def load_training_data(cls):
         # your code here
@@ -46,12 +60,12 @@ class MyModel:
         preds = []
 
         for inp in data:
-            inp = (inp if len(inp) < N - 1 else inp[-(N - 1):]).lower()
+            prefix = self.pad_prefix(inp.lower())
 
-            if inp not in self.lookups.keys():
+            if prefix not in self.lookups.keys():
                 preds.append('es ') # common characters
             else:
-                preds.append(self.lookups[inp])
+                preds.append(self.lookups[prefix])
 
         return preds
 
@@ -64,9 +78,12 @@ class MyModel:
         lookups = {}
         
         with open('work/model.csv') as preds_csv:
-            preds_reader = csv.reader(preds_csv, delimiter=',')
+            preds_reader = csv.reader(preds_csv, delimiter=',',
+                        quoting=csv.QUOTE_NONNUMERIC,
+                        doublequote=True,
+                        escapechar=None)
             for [bigram, preds] in preds_reader:
-                lookups[bigram] = preds
+                lookups[bigram] = cls.pad_prediction(preds)
 
         model = MyModel()
         model.lookups = lookups
