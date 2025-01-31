@@ -1,12 +1,16 @@
 #!/usr/bin/env python
+from collections import Counter, defaultdict
 import os
-import string
+from pathlib import Path
 import random
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import csv
+import re
 
 N = 5
+DATA_ROOT = 'data'
+MODEL_PATH = 'work/model.csv'
 
 class MyModel:
     """
@@ -15,6 +19,7 @@ class MyModel:
 
     def __init__(self):
         self.lookups = None
+        self.counts = None
 
     @staticmethod
     def pad_prediction(pred):
@@ -22,6 +27,11 @@ class MyModel:
         if len(pred) >= 3:
             return pred[:3]
         return pred + "es "[:(3 - len(pred))]
+
+    @staticmethod
+    def normalize_text(text: str) -> str:
+        """lowercase and removing extra spaces."""
+        return re.sub(r"\s+", " ", text).lower().strip()
 
     @staticmethod
     def pad_prefix(prefix):
@@ -32,13 +42,15 @@ class MyModel:
 
     @classmethod
     def load_training_data(cls):
-        # your code here
-        # this particular model doesn't train
-        return []
+        data = []
+        for path in Path(DATA_ROOT).rglob("*"):
+            if path.is_file():
+                data.append(MyModel.normalize_text(path.read_text()))
+        return data
+
 
     @classmethod
     def load_test_data(cls, fname):
-        # your code here
         data = []
         with open(fname) as f:
             for line in f:
@@ -53,14 +65,23 @@ class MyModel:
                 f.write('{}\n'.format(p))
 
     def run_train(self, data, work_dir):
-        # your code here
-        pass
+        train_data = self.load_training_data()
+        self.counts = defaultdict(Counter)
+        for text in train_data:
+            for i in range(len(text) - N + 1):
+                ngram = text[i : i + N]
+                context, char = ngram[:-1], ngram[-1]
+                self.counts[context][char] += 1
+
+        self.lookups = {}
+        self.save(work_dir)
+        self.load(work_dir)
 
     def run_pred(self, data):
         preds = []
 
         for inp in data:
-            prefix = self.pad_prefix(inp.lower())
+            prefix = MyModel.pad_prefix(inp.lower())
 
             if prefix not in self.lookups.keys():
                 preds.append('es ') # common characters
@@ -70,20 +91,32 @@ class MyModel:
         return preds
 
     def save(self, work_dir):
-        # your code here
-        pass
+        if not self.counts:
+            raise ValueError('Tried to save model before training')
+
+        with open(MODEL_PATH, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(
+                f, quoting=csv.QUOTE_NONNUMERIC, doublequote=True, escapechar=None
+            )
+            for context, char_counts in self.counts.items():
+                chars = "".join(char for char, _ in char_counts.most_common(3))
+                if "\u0000" not in context and "\u0000" not in chars:
+                    writer.writerow([context, chars])
 
     @classmethod
     def load(cls, work_dir):
+        if not os.path.isfile(MODEL_PATH):
+            raise ValueError('No model found in {}'.format(work_dir))
+
         lookups = {}
         
-        with open('work/model.csv') as preds_csv:
+        with open(MODEL_PATH) as preds_csv:
             preds_reader = csv.reader(preds_csv, delimiter=',',
                         quoting=csv.QUOTE_NONNUMERIC,
                         doublequote=True,
                         escapechar=None)
             for [bigram, preds] in preds_reader:
-                lookups[bigram] = cls.pad_prediction(preds)
+                lookups[bigram] = MyModel.pad_prediction(preds)
 
         model = MyModel()
         model.lookups = lookups
