@@ -34,11 +34,11 @@ class MyModel:
         return re.sub(r"\s+", " ", text).lower().strip()
 
     @staticmethod
-    def pad_prefix(prefix):
-        """pad prefix to N-1 characters using spaces."""
-        if len(prefix) >= N-1:
-            return prefix[-(N-1):]
-        return " " * (N-1 - len(prefix)) + prefix
+    def pad_prefix(prefix, n):
+        """pad prefix to n-1 characters using spaces."""
+        if len(prefix) >= n-1:
+            return prefix[-(n-1):]
+        return " " * (n-1 - len(prefix)) + prefix
 
     @classmethod
     def load_training_data(cls):
@@ -64,15 +64,18 @@ class MyModel:
             for p in preds:
                 f.write('{}\n'.format(p))
 
-    def run_train(self, data, work_dir):
-        train_data = self.load_training_data()
-        self.counts = defaultdict(Counter)
+    def train_ngrams(self, train_data, n):
         for text in train_data:
-            for i in range(len(text) - N + 1):
-                ngram = text[i : i + N]
+            for i in range(len(text) - n + 1):
+                ngram = text[i : i + n]
                 context, char = ngram[:-1], ngram[-1]
                 self.counts[context][char] += 1
 
+    def run_train(self, data, work_dir):
+        train_data = self.load_training_data()
+        self.counts = defaultdict(Counter)
+        for n in range(1, N + 1):
+            self.train_ngrams(train_data, n)
         self.lookups = {}
         self.save(work_dir)
         self.load(work_dir)
@@ -81,12 +84,17 @@ class MyModel:
         preds = []
 
         for inp in data:
-            prefix = MyModel.pad_prefix(inp.lower())
-
-            if prefix not in self.lookups.keys():
-                preds.append('es ') # common characters
+            n = N
+            pred = None
+            while n > 0 and pred is None:
+                prefix = MyModel.pad_prefix(inp.lower(), n)
+                if prefix in self.lookups.keys():
+                    pred = self.lookups[prefix]
+                n -= 1
+            if pred is not None:
+                preds.append(pred)
             else:
-                preds.append(self.lookups[prefix])
+                preds.append('es ') # common characters
 
         return preds
 
