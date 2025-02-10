@@ -4,11 +4,12 @@ import os
 from pathlib import Path
 import random
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from tqdm import tqdm
 
 import csv
 import re
 
-N = 6
+N = 5
 DATA_ROOT = 'data'
 MODEL_PATH = 'work/model.csv'
 
@@ -43,9 +44,9 @@ class MyModel:
     @classmethod
     def load_training_data(cls):
         data = []
-        for path in Path(DATA_ROOT).rglob("*"):
-            if path.is_file():
-                data.append(MyModel.normalize_text(path.read_text()))
+        for path in tqdm(Path(DATA_ROOT).rglob("*")):
+            if path.is_file() and not str(path).endswith(".DS_Store"):
+                data.append(MyModel.normalize_text(path.read_text(encoding="utf-8")))
         return data
 
 
@@ -65,17 +66,17 @@ class MyModel:
                 f.write('{}\n'.format(p))
 
     def train_ngrams(self, train_data, n):
-        for text in train_data:
+        for text in tqdm(train_data):
             for i in range(len(text) - n + 1):
                 ngram = text[i : i + n]
                 context, char = ngram[:-1], ngram[-1]
                 self.counts[context][char] += 1
 
     def run_train(self, data, work_dir):
-        train_data = self.load_training_data()
         self.counts = defaultdict(Counter)
         for n in range(1, N + 1):
-            self.train_ngrams(train_data, n)
+            print("N:", n)
+            self.train_ngrams(data, n)
         self.lookups = {}
         self.save(work_dir)
         self.load(work_dir)
@@ -100,7 +101,7 @@ class MyModel:
         if not self.counts:
             raise ValueError('Tried to save model before training')
 
-        with open(MODEL_PATH, 'w', newline='', encoding='utf-8') as f:
+        with open(os.path.join(work_dir, "model.csv"), 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(
                 f, quoting=csv.QUOTE_NONNUMERIC, doublequote=True, escapechar=None
             )
@@ -111,12 +112,12 @@ class MyModel:
 
     @classmethod
     def load(cls, work_dir):
-        if not os.path.isfile(MODEL_PATH):
+        if not os.path.isfile(os.path.join(work_dir, "model.csv")):
             raise ValueError('No model found in {}'.format(work_dir))
 
         lookups = {}
         
-        with open(MODEL_PATH) as preds_csv:
+        with open(os.path.join(work_dir, "model.csv"), encoding="utf-8") as preds_csv:
             preds_reader = csv.reader(preds_csv, delimiter=',',
                         quoting=csv.QUOTE_NONNUMERIC,
                         doublequote=True,
