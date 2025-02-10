@@ -8,7 +8,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import csv
 import re
 
-N = 5
+N = 6
 DATA_ROOT = 'data'
 MODEL_PATH = 'work/model.csv'
 
@@ -85,16 +85,14 @@ class MyModel:
 
         for inp in data:
             n = N
-            pred = None
-            while n > 0 and pred is None:
+            pred = ""
+            while n > 0 and len(pred) < 3:
                 prefix = MyModel.pad_prefix(inp.lower(), n)
                 if prefix in self.lookups.keys():
-                    pred = self.lookups[prefix]
+                    pred = ''.join(list(set(pred + self.lookups[prefix])))[:3]
                 n -= 1
-            if pred is not None:
-                preds.append(pred)
-            else:
-                preds.append('es ') # common characters
+
+            preds.append(MyModel.pad_prediction(pred))
 
         return preds
 
