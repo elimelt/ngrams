@@ -52,18 +52,13 @@ class MyModel:
 
     @classmethod
     def load_test_data(cls, fname):
-        data = []
         with open(fname) as f:
-            for line in f:
-                inp = line[:-1]  # the last character is a newline
-                data.append(inp)
-        return data
+            return f.readlines()
 
     @classmethod
     def write_pred(cls, preds, fname):
         with open(fname, 'wt') as f:
-            for p in preds:
-                f.write('{}\n'.format(p))
+            f.writelines(preds)
 
     def train_ngrams(self, train_data, n):
         for text in tqdm(train_data):
@@ -85,15 +80,16 @@ class MyModel:
         preds = []
 
         for inp in data:
+            inp = inp[:-1].lower()  # the last character is a newline
             n = N
             pred = ""
             while n > 0 and len(pred) < 3:
-                prefix = MyModel.pad_prefix(inp.lower(), n)
+                prefix = MyModel.pad_prefix(inp, n)
                 if prefix in self.lookups.keys():
-                    pred = ''.join(list(set(pred + self.lookups[prefix])))[:3]
+                    pred = ''.join(set(pred + self.lookups[prefix]))[:3]
                 n -= 1
 
-            preds.append(MyModel.pad_prediction(pred))
+            preds.append(MyModel.pad_prediction(pred) + "\n")
 
         return preds
 
