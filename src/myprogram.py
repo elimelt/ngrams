@@ -89,7 +89,7 @@ class MyModel:
                     pred = ''.join(set(pred + self.lookups[prefix]))[:3]
                 n -= 1
 
-            preds.append(MyModel.pad_prediction(pred) + "\n")
+            preds.append(MyModel.pad_prediction(pred) + "\n")  # need newline for writing
 
         return preds
 
