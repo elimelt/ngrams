@@ -85,12 +85,23 @@ class MyModel:
             pred = ""
             while n > 0 and len(pred) < 3:
                 prefix = MyModel.pad_prefix(inp, n)
-                if prefix in self.lookups.keys():
-                    pred = ''.join(set(pred + self.lookups[prefix]))[:3]
+                if prefix in self.lookups:
+                    new_chars = self.lookups[prefix]
+                    for c in new_chars:
+                        if c not in pred:
+                            pred += c
+                            if len(pred) >= 3:
+                                break
+
+                    if len(pred) >= 3:
+                        pred = pred[:3]
+                        break
                 n -= 1
 
-            preds.append(MyModel.pad_prediction(pred) + "\n")  # need newline for writing
+            if len(pred) < 3:
+                pred = MyModel.pad_prediction(pred)
 
+            preds.append(pred + "\n")
         return preds
 
     def save(self, work_dir):
