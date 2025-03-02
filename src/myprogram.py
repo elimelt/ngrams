@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 from collections import Counter, defaultdict
+import ctypes
 import os
 from pathlib import Path
 import random
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from tqdm import tqdm
+import mmap
 
 import csv
 import re
@@ -34,13 +36,6 @@ class MyModel:
         """lowercase and removing extra spaces."""
         return re.sub(r"\s+", " ", text).lower().strip()
 
-    @staticmethod
-    def pad_prefix(prefix, n):
-        """pad prefix to n-1 characters using spaces."""
-        if len(prefix) >= n-1:
-            return prefix[-(n-1):]
-        return " " * (n-1 - len(prefix)) + prefix
-
     @classmethod
     def load_training_data(cls):
         data = []
@@ -49,11 +44,12 @@ class MyModel:
                 data.append(MyModel.normalize_text(path.read_text(encoding="utf-8")))
         return data
 
-
     @classmethod
     def load_test_data(cls, fname):
-        with open(fname) as f:
-            return f.readlines()
+        with open(fname, "r") as f:
+            # mmap can be slightly faster than readlines
+            with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+                return mm.read().decode("utf-8").splitlines(True)
 
     @classmethod
     def write_pred(cls, preds, fname):
@@ -77,31 +73,31 @@ class MyModel:
         self.load(work_dir)
 
     def run_pred(self, data):
-        preds = []
+        preds = [None] * len(data)
+        lookups = self.lookups
+        pad_str = "es "
 
-        for inp in data:
-            inp = inp[:-1].lower()  # the last character is a newline
+        for idx, inp in enumerate(data):
+            inp = inp[:-1].lower()
             n = N
             pred = ""
+
             while n > 0 and len(pred) < 3:
-                prefix = MyModel.pad_prefix(inp, n)
-                if prefix in self.lookups:
-                    new_chars = self.lookups[prefix]
-                    for c in new_chars:
+                # pad prefix to n-1 characters long
+                prefix = (" " * (n - 1 - len(inp)) + inp[-(n - 1):]) if len(inp) < (n - 1) else inp[-(n - 1):]
+                if prefix in lookups:
+                    for c in lookups[prefix]:
                         if c not in pred:
                             pred += c
                             if len(pred) >= 3:
                                 break
-
                     if len(pred) >= 3:
-                        pred = pred[:3]
                         break
                 n -= 1
 
-            if len(pred) < 3:
-                pred = MyModel.pad_prediction(pred)
+            # pad prediction
+            preds[idx] = (pred + "es ")[:3] + "\n"
 
-            preds.append(pred + "\n")
         return preds
 
     def save(self, work_dir):
@@ -119,20 +115,30 @@ class MyModel:
 
     @classmethod
     def load(cls, work_dir):
-        if not os.path.isfile(os.path.join(work_dir, "model.csv")):
-            raise ValueError('No model found in {}'.format(work_dir))
+        # TODO: remove check to save more time
+        model_path = os.path.join(work_dir, "model.csv")
+        if not os.path.isfile(model_path):
+            raise ValueError(f'No model found in {work_dir}')
 
-        lookups = {}
-        
-        with open(os.path.join(work_dir, "model.csv"), encoding="utf-8") as preds_csv:
-            preds_reader = csv.reader(preds_csv, delimiter=',',
-                        quoting=csv.QUOTE_NONNUMERIC,
-                        doublequote=True,
-                        escapechar=None)
-            for [bigram, preds] in preds_reader:
-                lookups[bigram] = MyModel.pad_prediction(preds)
+        pad_prediction = cls.pad_prediction
+        # pre-size lookups dict
+        ctypes.pythonapi._PyDict_NewPresized.restype = ctypes.py_object
+        lookups = ctypes.pythonapi._PyDict_NewPresized(120_000)
 
-        model = MyModel()
+        # buffer file reading to 1MB
+        # TODO: set it to be slightly larger than exact model.csv size of submission
+        with open(model_path, encoding="utf-8", buffering=1024*1024) as preds_csv:
+            preds_reader = csv.reader(
+                preds_csv,
+                delimiter=',',
+                quoting=csv.QUOTE_NONNUMERIC,
+                doublequote=True,
+                escapechar=None
+            )
+            for bigram, preds in preds_reader:
+                lookups[bigram] = pad_prediction(preds)
+
+        model = cls()
         model.lookups = lookups
         return model
 
